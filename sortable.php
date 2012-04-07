@@ -1,13 +1,13 @@
 <?php
-if(!isset($_SERVER['HTTP_REFERER']) || parse_url($_SERVER['HTTP_REFERER'], PHP_URL_HOST) != $_SERVER['HTTP_HOST'])
-   exit;
+//if(!isset($_SERVER['HTTP_REFERER']) || parse_url($_SERVER['HTTP_REFERER'], PHP_URL_HOST) != $_SERVER['HTTP_HOST'])
+//   exit;
 ?>
 function sortable(node){
    if(!node) return false;
 
    // Locate the table object
    var table;
-   
+
    if(node.tagName.toLowerCase()=='table')
       table = node;
    else
@@ -21,16 +21,16 @@ function sortable(node){
             return false;
       }else
          return false;
-   
+
    // CHANGEable variables
    table.diPosition       = 0; // direction_indicator_position,  0 -> Before Header, 1 -> After Header, -1 -> Not displayed
-	table.sortOrderDefault = -1; // 1 -> Ascending, -1 -> Descending
-	// END of CHANGEable variables
+   table.sortOrderDefault = -1; // 1 -> Ascending, -1 -> Descending
+   // END of CHANGEable variables
 
-	// Not for editing!!!
-	table.sortOrder = table.sortOrderDefault;
-	table.sortedBy  = null;
-	
+   // Not for editing!!!
+   table.sortOrder = table.sortOrderDefault;
+   table.sortedBy  = null;
+
    // Add event triggers
    for(ci=0; ci<table.rows[0].cells.length; ci++){
       table.rows[0].cells[ci].table      = table;
@@ -38,18 +38,31 @@ function sortable(node){
       table.rows[0].cells[ci].onclick    = new Function("this.table.effect("+ci+");");
    }
 
-	// Define the sort rule
+   // Define the sort rule
    table.sortRule = function(rowA, rowB){
       // Uses "table" reference
-      // Tryed to avoid it, but relocating the table is much harder/heavier
+      // Tried to avoid it, but relocating the table is much harder/heavier
       // Hopefully, no problems will come out of it
 
-      // Get the actuall values to compare
-      var a = rowA.cells[table.sortedBy].innerHTML;
-      var b = rowB.cells[table.sortedBy].innerHTML;
-                
+
+      // Get the actual values to compare
+      if(rowA.cells[table.sortedBy].getAttribute('index'))
+         var a = rowA.cells[table.sortedBy].getAttribute('index');
+      else
+         var a = rowA.cells[table.sortedBy].innerHTML;
+
+      if(rowB.cells[table.sortedBy].getAttribute('index'))
+         var b = rowB.cells[table.sortedBy].getAttribute('index');
+      else
+         var b = rowB.cells[table.sortedBy].innerHTML;
+
+
+      //Strip HTML
+      a = a.replace(/<(?:.|\s)*?>/g, "");
+      b = b.replace(/<(?:.|\s)*?>/g, "");
+
       // If is Not_a_Number (string/alike)
-      if(isNaN(a) || isNaN(b))
+      if(isNaN(parseInt(a)) || isNaN(parseInt(b)))
          return (table.sortOrder * ((a<b) - (a>b)));
 
       // If is number
@@ -63,7 +76,7 @@ function sortable(node){
          this.sortOrder *= -1;
       else
          this.sortOrder  =  this.sortOrderDefault;
-         
+
       this.sortedBy = col;
 
 
@@ -73,12 +86,12 @@ function sortable(node){
          for(i=0; i<di_collection.length; i++)
             di_collection[i].parentNode.removeChild( di_collection[i] );
 
-      	// Assemble a new indicator
+         // Assemble a new indicator
          var ih  = this.rows[0].cells[col].innerHTML;                           // ih = /innerHTML shorthand/
          var di  = '<span class="sort direction '+((this.sortOrder==-1)? "down" : "up")+'">';
              di += ((this.sortOrder==-1)? "&darr;" : "&uarr;")+'</span>';        // di = /Direction Indicator/
 
-      	// Deploy the new indicator
+         // Deploy the new indicator
          if(this.diPosition != -1) // -1 -> Disabled
             this.rows[0].cells[col].innerHTML = ( (this.diPosition == 0)?  (di + ih) : (ih + di) );
 
@@ -91,17 +104,17 @@ function sortable(node){
 
 
       // Sort the array
-      arr.shift(); // Explude the first/header row
+      arr.shift(); // Exclude the first/header row
       arr.sort( this.sortRule );
 
 
       // Redisplay the table using the sorted array
          // Re-appending nodes should move them instead of applying a new copy
       for(i=0; i<arr.length; i++)
-      	this.appendChild(arr[i]);
+         this.appendChild(arr[i]);
    }
 
-   // Alias function names 
+   // Alias function names
    table.effect = table.sort;
    table.sortBy = table.sort;
    table.sortby = table.sort;
@@ -112,10 +125,19 @@ function sortable(node){
 // Make sortable By Class
 function Sortables(){
    var tables = document.getElementsByTagName('table');
-   
+
    for(i=0; i<tables.length; i++){
-      if(tables[i].className.indexOf("sortable") != -1)
-      	new sortable(tables[i]);
+      if(tables[i].className.indexOf("sortable") == -1)
+         continue;
+
+      var s = new sortable(tables[i]);
+
+      if(tables[i].getAttribute('by'))
+         s.sortBy(tables[i].getAttribute('by'));
+      if(tables[i].getAttribute('sortby'))
+         s.sortBy(tables[i].getAttribute('sortby'));
+      if(tables[i].getAttribute('sort'))
+         s.sortBy(tables[i].getAttribute('sort'));
    }
 }
 
