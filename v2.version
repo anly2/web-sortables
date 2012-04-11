@@ -1,0 +1,18 @@
+### Sortable Tables ###
+#This is a version file
+#  used for dynamically updating links so that people know there's something new
+#  it also contains the changelogs for a given project
+
+
+version 0
+    - Utilised some heavy code using php,html and javascript to sort tables
+
+version 1
+    - Reworked so that only javascript is now used
+
+version 2
+    - Tables no longer need to be defined via the javascript function
+    - The new function accepts any table - styled or not, with any number of attributes
+    - Sortable tables can be told to sort at definition, meaning they will appear already sorted
+          + Example: <table class="sortable" sortby="0">...</table>   will have the table sorted according to the first col
+          + Example: <table class="sortable" sortby="0" sort="0">...</table>   will sort the table twice, having the effect of a reversed sort
